@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 11 22:34:20 2020
+Created on Wed 7th Aug 2021
 
-@author: Krish Naik
+@author: Santosh Behera
 """
 
 from __future__ import division, print_function
-# coding=utf-8
-import sys
 import os
-import glob
-import re
 import numpy as np
 
 # Keras
@@ -21,8 +17,6 @@ from tensorflow.keras.preprocessing import image
 # Flask utils
 from flask import Flask, redirect, url_for, request, render_template
 from werkzeug.utils import secure_filename
-
-# from gevent.pywsgi import WSGIServer
 
 # Define a flask app
 app = Flask(__name__)
@@ -40,11 +34,8 @@ def model_predict(img_path, model):
 
     # Preprocessing the image
     x = image.img_to_array(img)
-    # x = np.true_divide(x, 255)
     x = np.expand_dims(x, axis=0)
 
-    # Be careful how your trained model deals with the input
-    # otherwise, it won't make correct prediction!
     x = preprocess_input(x)
 
     preds = model.predict(x)
@@ -53,7 +44,6 @@ def model_predict(img_path, model):
 
 @app.route('/', methods=['GET'])
 def index():
-    # Main page
     return render_template('index.html')
 
 
@@ -63,7 +53,6 @@ def upload():
         # Get the file from post request
         f = request.files['file']
 
-        # Save the file to ./uploads
         basepath = os.path.dirname(__file__)
         file_path = os.path.join(
             basepath, 'uploads', secure_filename(f.filename))
@@ -72,8 +61,6 @@ def upload():
         # Make prediction
         preds = model_predict(file_path, model)
 
-        # Process your result for human
-        # pred_class = preds.argmax(axis=-1)            # Simple argmax
         pred_class = decode_predictions(preds, top=1)  # ImageNet Decode
         result = str(pred_class[0][0][1])  # Convert to string
         return result
